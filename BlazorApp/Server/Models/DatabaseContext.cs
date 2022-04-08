@@ -1,4 +1,5 @@
-﻿using BlazorApp.Shared.Models;
+﻿using BlazorApp.Shared;
+using BlazorApp.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 namespace BlazorApp.Server.Models
 {
@@ -34,5 +35,7 @@ namespace BlazorApp.Server.Models
             OnModelCreatingPartial(modelBuilder);
         }
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        public DbSet<UserAuth> UsersAuth { get; set; }
     }
 }

@@ -1,13 +1,15 @@
-using BlazorApp.Server.Interfaces;
-using BlazorApp.Server.Models;
-using BlazorApp.Server.Services;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.EntityFrameworkCore;
+global using BlazorApp.Server.Services.AuthService;
+global using BlazorApp.Server.Interfaces;
+global using BlazorApp.Server.Models;
+global using BlazorApp.Server.Services;
+global using Microsoft.AspNetCore.ResponseCompression;
+global using Microsoft.EntityFrameworkCore;
+global using BlazorApp.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddDbContext<DatabaseContext>
     (options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
