@@ -1,5 +1,6 @@
-﻿using BlazorApp.Shared;
-using Microsoft.Exchange.WebServices.Data;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace BlazorApp.Server.Services.AuthService
@@ -7,10 +8,36 @@ namespace BlazorApp.Server.Services.AuthService
     public class AuthService : IAuthService
     {
         private readonly DatabaseContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(DatabaseContext context)
+        public AuthService(DatabaseContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+        }
+
+        public async Task<ServiceResponse<string>> Login(string email, string password)
+        {
+            var response = new ServiceResponse<string>();
+            var user = await _context.UsersAuth
+                .FirstOrDefaultAsync(x => x.Email.ToLower().Equals(email.ToLower()));
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "User not found.";
+            }
+            else if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            {
+                response.Success = false;
+                response.Message = "Wrong password.";
+            }
+            else
+            {
+                response.Data = CreateToken(user);
+            }
+            
+            return response;
         }
 
         public async Task<ServiceResponse<int>> Register(UserAuth user, string password)
@@ -32,7 +59,7 @@ namespace BlazorApp.Server.Services.AuthService
             _context.UsersAuth.Add(user);
             await _context.SaveChangesAsync();
 
-            return new ServiceResponse<int> { Data = user.Id };
+            return new ServiceResponse<int> { Data = user.Id, Message = "Registration successful!" };
         }
 
         public async Task<bool> UserExists(string email)
@@ -53,6 +80,39 @@ namespace BlazorApp.Server.Services.AuthService
                 passwordHash = hmac
                     .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = 
+                    hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
+            }
+        }
+
+        private string CreateToken(UserAuth user)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Email)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
+                .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds);
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
     }
 }
