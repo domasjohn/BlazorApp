@@ -11,7 +11,6 @@ Here are the main tasks that I did on this project:
     <li>Installed and connected my project to the <strong>SQL database.</strong></li>
     <li>Used <strong>Swagger</strong> tool to test the <strong>RESTful APIs.</strong></li>
     <li>Added <strong>Authentication</strong> with <strong>JSON Web Tokens.</strong></li>
-    <li>Added <strong>Registration</strong> and <strong>Login</strong> pages.</li>
     <li>Deployed my project to <strong>Azure.</strong></li>
 </ul>
 
