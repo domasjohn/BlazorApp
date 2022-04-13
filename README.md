@@ -19,5 +19,5 @@ Here are the main tasks that I did on this project:
     <li>Deployed my project to <strong>Azure.</strong></li>
 </ul>
 
-If you would like to contact me, you can say hi to me via 
+If you would like to contact me to talk more, you can do it via my 
 <a href="https://www.linkedin.com/in/domas-jonaitis/" target="_blank">LinkedIn</a> 👈
