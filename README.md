@@ -1,7 +1,3 @@
-# BlazorApp
-
-<PageTitle>Domas Jonaitis</PageTitle>
-
 <h1>Hey there! 👋</h1>
 
 My name is Domas Jonaitis, and welcome to my web app!
