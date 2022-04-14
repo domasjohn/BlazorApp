@@ -8,9 +8,23 @@ global using BlazorApp.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.WithOrigins("https://localhost:7079",
+                            "https://domasjonaitis.azurewebsites.net")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+});
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddDbContext<DatabaseContext>
     (options =>
@@ -59,11 +73,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseCors(MyAllowSpecificOrigins);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
 
 app.Run();
